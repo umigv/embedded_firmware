@@ -34,6 +34,14 @@ just monitor estop_rx
 just ports
 ```
 
+```bash
+# Check formatting
+just lint
+
+# Auto-fix formatting
+just format
+```
+
 Run `just` to list all available commands.
 
 ## Adding a New Project
