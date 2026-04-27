@@ -1,26 +1,63 @@
 # ARV Embedded Firmware
 
-## LED Status
+| Project | Board | Description |
+|---|---|---|
+| [`estop_tx`](estop_tx/README.md) | ESP32 | LoRa e-stop transmitter (handheld button) |
+| [`estop_rx`](estop_rx/README.md) | ESP32 | LoRa e-stop receiver (on robot) |
+| [`led_status`](led_status/README.md) | Arduino Mega | RGB LED strip status controller |
+| [`recovery_ultrasonic`](recovery_ultrasonic/README.md) | Arduino Mega | Three HC-SR04 sensors, CSV serial output |
 
-Send a single ASCII character over serial (9600 baud) to set the mode:
+## Setup
 
-| Char | Color/Mode |
-|------|------------|
-| `0`  | Off |
-| `1`  | Solid blue (teleop) |
-| `2`  | Flashing blue |
-| `3`  | Flashing green |
-| `4`  | Flashing yellow |
-| `5`  | Flashing purple |
-| `6`  | Flashing red |
-| `9`  | Rainbow |
-
-## Recovery Ultrasonic
-
-Outputs one CSV line per cycle over serial (9600 baud):
-
-```
-s1,s2,s3
+```bash
+just setup
 ```
 
-Each value is distance in cm. `999` means out of range / no echo.
+For VS Code: install the [PlatformIO IDE extension](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) for IntelliSense and one-click upload.
+
+## Build & Upload
+
+```bash
+# Build one project
+just build estop_tx
+
+# Build all projects
+just build
+
+# Upload to connected board
+just upload estop_tx
+
+# Open serial monitor
+just monitor estop_rx
+
+# List available serial ports
+just ports
+```
+
+Run `just` to list all available commands.
+
+## Adding a New Project
+
+```bash
+just new my_project
+```
+
+Scaffolds `my_project/platformio.ini` and `my_project/src/main.cpp`. Fill in `platformio.ini` with your board:
+
+```ini
+; ESP32
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = arduino
+monitor_speed = 9600
+
+; Arduino Mega
+[env:megaatmega2560]
+platform = atmelavr
+board = megaatmega2560
+framework = arduino
+monitor_speed = 9600
+```
+
+For other boards see the [PlatformIO board explorer](https://registry.platformio.org/search?t=platform).
