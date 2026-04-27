@@ -50,6 +50,8 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
   FastLED.clear(true);
   Serial.begin(9600);
+  // Boot handshake: led_subscriber.py blocks until it sees this line.
+  Serial.println("READY");
 }
 
 void loop() {
