@@ -13,7 +13,13 @@
 just setup
 ```
 
-For VS Code: install the [PlatformIO IDE extension](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) for IntelliSense and one-click upload.
+**VS Code:** Install [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extensions (VS Code will prompt you automatically). Then run:
+
+```bash
+just intellisense
+```
+
+This generates `compile_commands.json` in each project for clangd IntelliSense. Re-run after modifying `platformio.ini` (e.g. adding a library or changing board).
 
 ## Build & Upload
 

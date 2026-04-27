@@ -79,6 +79,16 @@ new project:
     } > "{{project}}/src/main.cpp"
     echo "Created {{project}} — fill in platformio.ini with your board config"
 
+# Generate compile_commands.json for clangd IntelliSense in all projects
+# Re-run after changing platformio.ini (e.g. adding a library or changing board)
+intellisense:
+    #!/usr/bin/env bash
+    set -e
+    for proj in $(find . -maxdepth 2 -name "platformio.ini" | xargs -I{} dirname {} | sort); do
+        echo "=== $proj ==="
+        (cd "$proj" && pio run --target compiledb)
+    done
+
 # List available serial ports
 ports:
     pio device list
