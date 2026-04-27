@@ -1,4 +1,5 @@
 // LoRa E-Stop RX (State Tracking - LED ON when Stopped)
+#include <Arduino.h>
 #include <SPI.h>
 #include <RH_RF95.h>
 
@@ -25,11 +26,11 @@ void setup() {
   pinMode(LED, OUTPUT);
   pinMode(ODRV, OUTPUT);
   pinMode(RFM95_RST, OUTPUT);
-  
+
   // Initialize to the SAFE state on boot
   digitalWrite(ODRV, HIGH); // Motor drive enabled
   digitalWrite(LED, LOW);   // Warning LED OFF
-  
+
   digitalWrite(RFM95_RST, HIGH);
   Serial.begin(9600);
   delay(100);
@@ -42,7 +43,7 @@ void setup() {
 
   if (!rf95.init()) while (1);
   if (!rf95.setFrequency(RF95_FREQ)) while (1);
-  
+
   rf95.setTxPower(23, false);
 }
 
@@ -58,19 +59,19 @@ void loop() {
     uint8_t len = sizeof(buf);
 
     if (rf95.recv(buf, &len)) {
-      
+
       if (len > 0) {
         uint8_t incomingState = buf[0];
 
         // ONLY execute if the transmitter's state has CHANGED
         if (incomingState != lastReceivedState) {
-          
+
           if (incomingState == ESTOP_TRIGGERED) {
             // Button was just PRESSED (System is STOPPED)
             digitalWrite(ODRV, LOW);  // Disable the motor/drive
             digitalWrite(LED, HIGH);  // Turn ON the warning LED
             Serial.println("1");      // Outputs '1' ONCE until released
-          } 
+          }
           else if (incomingState == ESTOP_SAFE) {
             // Button was just RELEASED (System is SAFE)
             digitalWrite(ODRV, HIGH); // Enable the motor/drive
@@ -80,14 +81,14 @@ void loop() {
 
           // Update our tracker to the new state
           lastReceivedState = incomingState;
-          
+
           // Brief lockout to prevent double-triggers from signal bounce
-          delay(50); 
+          delay(50);
         }
       }
 
       // Always send the Ack so the TX knows we are alive
-      uint8_t data[] = "Ack"; 
+      uint8_t data[] = "Ack";
       rf95.send(data, sizeof(data));
       rf95.waitPacketSent();
     }

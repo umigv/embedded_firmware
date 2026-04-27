@@ -1,5 +1,6 @@
 // LoRa E-Stop TX (Toggle Based with Debounce)
 // -*- mode: C++ -*-
+#include <Arduino.h>
 #include <SPI.h>
 #include <RH_RF95.h>
 
@@ -8,7 +9,7 @@
 #define RFM95_RST 26
 #define RFM95_INT 22
 #define LED 4
-#define SW 16 
+#define SW 16
 
 #define RF95_FREQ 915.0
 
@@ -42,12 +43,12 @@ void setup() {
     Serial.println("LoRa radio init failed");
     while (1);
   }
-  
+
   if (!rf95.setFrequency(RF95_FREQ)) {
     Serial.println("setFrequency failed");
     while (1);
   }
-  
+
   rf95.setTxPower(23, false);
 
   // Sync LED with the initial safe state

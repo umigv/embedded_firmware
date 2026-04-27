@@ -13,6 +13,7 @@
 // All modes are non-blocking — serial commands are responsive at all times,
 // including during animations.
 
+#include <Arduino.h>
 #include <FastLED.h>
 
 #define DATA_PIN     6
@@ -45,6 +46,9 @@ unsigned long lastRainbowStepMs  = 0;
 unsigned long lastHeartbeatMs    = 0;
 bool          blinkOn            = false;
 uint8_t       rainbowHueOffset   = 0;
+
+void handleSerial();
+void updateLeds();
 
 void setup() {
   // Use GRB so named FastLED colors come out correct on WS2811 strips.
