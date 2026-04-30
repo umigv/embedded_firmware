@@ -1,62 +1,81 @@
-// recovery_ultrasonic.ino
-// Reads three HC-SR04 ultrasonic sensors and prints all three readings
-// over serial as CSV: "s1,s2,s3\r\n"
-// Compatible with Arduino IDE's Serial Plotter.
-
-const int trigPinOne   = 9;
-const int echoPinOne   = 10;
-const int trigPinTwo   = 11;
-const int echoPinTwo   = 12;
+const int trigPinOne = 9;
+const int echoPinOne = 10;
+const int trigPinTwo = 11;
+const int echoPinTwo = 12;
 const int trigPinThree = 2;
 const int echoPinThree = 3;
+long duration;
+int distance;
+int distanceOne;
+int distanceTwo;
+int distanceThree;
 
-// Cap pulseIn at 30 ms -> roughly 5 m max range. Anything longer is treated
-// as "no echo" so the loop never stalls for a full second on a missing reading.
-const unsigned long PULSE_TIMEOUT_US = 30000UL;
-
-// Returned when a sensor times out (no echo within PULSE_TIMEOUT_US).
-const int OUT_OF_RANGE_CM = 999;
 
 void setup() {
-  pinMode(trigPinOne, OUTPUT);
-  pinMode(echoPinOne, INPUT);
-  pinMode(trigPinTwo, OUTPUT);
+  // put your setup code here, to run once:
+  pinMode(trigPinOne, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPinOne, INPUT); // Sets the echoPin as an Input
+  pinMode(trigPinTwo, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPinTwo, INPUT);
-  pinMode(trigPinThree, OUTPUT);
+  pinMode(trigPinThree, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPinThree, INPUT);
   Serial.begin(9600);
 }
 
+
 void loop() {
-  int distanceOne   = readUltrasoundSensor(trigPinOne,   echoPinOne);
+  distanceOne = readUltrasoundSensorOne();
   delay(30);
-  int distanceTwo   = readUltrasoundSensor(trigPinTwo,   echoPinTwo);
+  distanceTwo = readUltrasoundSensorTwo();
   delay(30);
-  int distanceThree = readUltrasoundSensor(trigPinThree, echoPinThree);
+  distanceThree = readUltrasoundSensorThree();
 
-  // CSV output: sensor1, sensor2, sensor3
-  Serial.print(distanceOne);
-  Serial.print(',');
-  Serial.print(distanceTwo);
-  Serial.print(',');
-  Serial.println(distanceThree);
-
-  delay(200);
+  // Bulletproof way to find the absolute minimum of the three
+  distance = distanceOne; 
+  if (distanceTwo < distance) {
+    distance = distanceTwo;
+  }
+  if (distanceThree < distance) {
+    distance = distanceThree;
+  }
+  
+  // Just print the lowest distance alone! No extra text.
+  Serial.println(distance);
+  delay(30);
 }
 
-// Single reader function — pass in whichever trig/echo pair you want to read.
-// Returns distance in cm, or OUT_OF_RANGE_CM if no echo arrives in time.
-int readUltrasoundSensor(int trigPin, int echoPin) {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
 
-  unsigned long duration = pulseIn(echoPin, HIGH, PULSE_TIMEOUT_US);
-  if (duration == 0) {
-    return OUT_OF_RANGE_CM;  // timeout: nothing in range
-  }
-  // 0.0343 cm/us speed of sound, divided by 2 for round-trip.
-  return (int)(duration * 0.0343 / 2.0);
+double readUltrasoundSensorOne(){
+  digitalWrite(trigPinOne, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPinOne, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPinOne, LOW);
+  duration = pulseIn(echoPinOne, HIGH);
+  distance = duration * 0.034 / 2;
+  return distance;
+}
+
+
+double readUltrasoundSensorTwo(){
+  digitalWrite(trigPinTwo, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPinTwo, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPinTwo, LOW);
+  duration = pulseIn(echoPinTwo, HIGH);
+  distance = duration * 0.034 / 2;
+  return distance;
+}
+
+
+double readUltrasoundSensorThree(){
+  digitalWrite(trigPinThree, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPinThree, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPinThree, LOW);
+  duration = pulseIn(echoPinThree, HIGH);
+  distance = duration * 0.034 / 2;
+  return distance;
 }
