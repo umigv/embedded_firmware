@@ -20,8 +20,9 @@
 #define BRIGHTNESS   100
 
 // Animation timing (milliseconds).
-const unsigned long BLINK_INTERVAL_MS   = 500;
-const unsigned long RAINBOW_INTERVAL_MS = 20;  // lower = faster scroll
+const unsigned long BLINK_INTERVAL_MS    = 500;
+const unsigned long RAINBOW_INTERVAL_MS  = 20;   // lower = faster scroll
+const unsigned long HEARTBEAT_TIMEOUT_MS = 3000;  // rainbow if no command within this window
 
 CRGB leds[NUM_LEDS];
 
@@ -39,10 +40,11 @@ enum Mode {
 Mode currentMode = MODE_OFF;
 
 // Animation state.
-unsigned long lastBlinkToggleMs = 0;
-unsigned long lastRainbowStepMs = 0;
-bool          blinkOn           = false;
-uint8_t       rainbowHueOffset  = 0;
+unsigned long lastBlinkToggleMs  = 0;
+unsigned long lastRainbowStepMs  = 0;
+unsigned long lastHeartbeatMs    = 0;
+bool          blinkOn            = false;
+uint8_t       rainbowHueOffset   = 0;
 
 void setup() {
   // Use GRB so named FastLED colors come out correct on WS2811 strips.
@@ -56,7 +58,9 @@ void setup() {
 
 void loop() {
   handleSerial();
-  updateLeds();
+  bool driverConnected = lastHeartbeatMs > 0 &&
+                         (millis() - lastHeartbeatMs <= HEARTBEAT_TIMEOUT_MS);
+  updateLeds(driverConnected ? currentMode : MODE_RAINBOW);
 }
 
 void handleSerial() {
@@ -76,6 +80,8 @@ void handleSerial() {
     case '9': currentMode = MODE_RAINBOW;     break;
     default:  /* ignore unknown chars (e.g. \r, \n) */ return;
   }
+
+  lastHeartbeatMs = millis();
 
   // On any mode change, reset blink so the new color starts ON immediately
   // instead of waiting up to 500 ms for the next toggle.
@@ -102,22 +108,22 @@ bool isBlinkingMode(Mode m) {
          m == MODE_PURPLE || m == MODE_RED;
 }
 
-void updateLeds() {
+void updateLeds(Mode mode) {
   unsigned long now = millis();
 
-  if (currentMode == MODE_OFF) {
+  if (mode == MODE_OFF) {
     fill_solid(leds, NUM_LEDS, CRGB::Black);
     FastLED.show();
     return;
   }
 
-  if (currentMode == MODE_TELEOP_BLUE) {
+  if (mode == MODE_TELEOP_BLUE) {
     fill_solid(leds, NUM_LEDS, CRGB::Blue);
     FastLED.show();
     return;
   }
 
-  if (currentMode == MODE_RAINBOW) {
+  if (mode == MODE_RAINBOW) {
     if (now - lastRainbowStepMs >= RAINBOW_INTERVAL_MS) {
       lastRainbowStepMs = now;
       rainbowHueOffset++;
@@ -129,12 +135,12 @@ void updateLeds() {
     return;
   }
 
-  if (isBlinkingMode(currentMode)) {
+  if (isBlinkingMode(mode)) {
     if (now - lastBlinkToggleMs >= BLINK_INTERVAL_MS) {
       lastBlinkToggleMs = now;
       blinkOn = !blinkOn;
       fill_solid(leds, NUM_LEDS,
-                 blinkOn ? blinkColorFor(currentMode) : CRGB::Black);
+                 blinkOn ? blinkColorFor(mode) : CRGB::Black);
       FastLED.show();
     }
   }
