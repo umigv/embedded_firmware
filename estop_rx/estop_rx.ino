@@ -14,7 +14,10 @@ const uint8_t ESTOP_TRIGGERED = 0xFF; // Sent when button is pressed
 const uint8_t ESTOP_SAFE = 0x00;      // Sent when button is released (Adjust if your TX uses a different byte)
 
 // Track the last known state of the transmitter. We start assuming it's safe.
-uint8_t lastReceivedState = ESTOP_SAFE; 
+uint8_t lastReceivedState = ESTOP_SAFE;
+
+#define SERIAL_HEARTBEAT_MS 500
+unsigned long lastHeartbeatTime = 0;
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
@@ -44,6 +47,12 @@ void setup() {
 }
 
 void loop() {
+  unsigned long now = millis();
+  if (now - lastHeartbeatTime >= SERIAL_HEARTBEAT_MS) {
+    Serial.println(lastReceivedState == ESTOP_TRIGGERED ? "1" : "0");
+    lastHeartbeatTime = now;
+  }
+
   if (rf95.available()) {
     uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
