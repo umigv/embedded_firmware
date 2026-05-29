@@ -1,4 +1,4 @@
-// LoRa E-Stop TX (With Reply)
+// LoRa E-Stop TX (Toggle Based with Debounce)
 // -*- mode: C++ -*-
 #include <SPI.h>
 #include <RH_RF95.h>
@@ -10,21 +10,21 @@
 #define LED 4
 #define SW 16 
 
-
 #define RF95_FREQ 915.0
 
 // Protocol: 0xFF = STOP, 0x00 = SAFE
 const uint8_t ESTOP_TRIGGERED = 0xFF;
 const uint8_t ESTOP_SAFE      = 0x00;
 
-uint8_t state;
+// --- TOGGLE TRACKING VARIABLES ---
+bool estopActive = false;      // Tracks system state: false = SAFE, true = STOP
+bool lastButtonState = HIGH;   // Tracks the physical pin state from the last loop
 
 RH_RF95 rf95(RFM95_CS, RFM95_INT);
 
 void setup() {
   pinMode(LED, OUTPUT);
-  // Assuming switch connects Pin 16 to Ground when pressed
-  pinMode(SW, INPUT_PULLUP); 
+  pinMode(SW, INPUT_PULLUP); // Pin 16 pulled HIGH, drops to LOW when pressed
 
   pinMode(RFM95_RST, OUTPUT);
   digitalWrite(RFM95_RST, HIGH);
@@ -49,32 +49,47 @@ void setup() {
   }
   
   rf95.setTxPower(23, false);
+
+  // Sync LED with the initial safe state
+  digitalWrite(LED, LOW); 
 }
 
 void loop() {
-  uint8_t data_packet[1];
-  
-  // 1. READ SWITCH & SET LED
-  if (digitalRead(SW) == LOW) {
-    data_packet[0] = ESTOP_TRIGGERED;
-    digitalWrite(LED, HIGH); // TX LED ON (Stop Pressed)
-    Serial.println("Sending: STOP (0xFF)");
-  } 
-  else {
-    data_packet[0] = ESTOP_SAFE;
-    digitalWrite(LED, LOW);  // TX LED OFF
-    Serial.println("Sending: SAFE (0x00)");
-  }
+  // 1. READ SWITCH & DETECT NEW PRESS (FALLING EDGE)
+  bool currentButtonState = digitalRead(SW);
 
-  // 2. SEND PACKET
+  // If button is currently LOW (pressed) but was HIGH (released) last time:
+  if (currentButtonState == LOW && lastButtonState == HIGH) {
+    
+    // Toggle our state variable
+    estopActive = !estopActive; 
+    
+    // Update local LED immediately for instant visual feedback
+    digitalWrite(LED, estopActive ? HIGH : LOW); 
+    
+    Serial.print("Button Clicked! Toggled state to: ");
+    Serial.println(estopActive ? "STOP (0xFF)" : "SAFE (0x00)");
+
+    // Hardware Debounce: Wait out the physical contact switch bounce
+    delay(50); 
+  }
+  
+  // Save the current state for comparison on the next loop execution
+  lastButtonState = currentButtonState;
+
+  // 2. PREPARE PACKET BASED ON TOGGLED STATE
+  uint8_t data_packet[1];
+  data_packet[0] = estopActive ? ESTOP_TRIGGERED : ESTOP_SAFE;
+
+  // 3. SEND PACKET
   rf95.send(data_packet, 1);
   rf95.waitPacketSent();
   
-  // 3. WAIT FOR REPLY (1 Second Timeout)
+  // 4. WAIT FOR REPLY (Reduced to 150ms for button responsiveness)
   uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
   uint8_t len = sizeof(buf);
   
-  if (rf95.waitAvailableTimeout(1000)) // 
+  if (rf95.waitAvailableTimeout(150)) 
   {
     if (rf95.recv(buf, &len)) {
       Serial.print("Got reply: ");
@@ -89,6 +104,6 @@ void loop() {
     Serial.println("No reply (Timeout)");
   }
   
-  // Small delay before next loop
-  delay(100); 
+  // Small baseline delay to prevent resource flooding
+  delay(10); 
 }
