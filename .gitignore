@@ -1,4 +1,7 @@
 .pio/
+.pixi/
+.cache/
+__pycache__/
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json

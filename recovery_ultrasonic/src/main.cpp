@@ -18,6 +18,9 @@ int distanceTwo;
 int distanceThree;
 
 int readUltrasoundSensor(int trigPin, int echoPin);
+double readUltrasoundSensorOne();
+double readUltrasoundSensorTwo();
+double readUltrasoundSensorThree();
 
 void setup() {
     // put your setup code here, to run once:

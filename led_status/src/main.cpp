@@ -10,8 +10,7 @@
 //   '6' -> Flashing red
 //   '9' -> Rainbow (animated)
 //
-// All modes are non-blocking — serial commands are responsive at all times,
-// including during animations.
+// All modes are non-blocking. Serial commands are responsive at all times, including during animations.
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -39,7 +38,7 @@ bool blinkOn = false;
 uint8_t rainbowHueOffset = 0;
 
 void handleSerial();
-void updateLeds();
+void updateLeds(Mode mode);
 
 void setup() {
     // Use GRB so named FastLED colors come out correct on WS2811 strips.
@@ -148,12 +147,15 @@ void updateLeds(Mode mode) {
             }
             FastLED.show();
         }
+        return;
+    }
 
-        if (isBlinkingMode(mode)) {
-            if (now - lastBlinkToggleMs >= BLINK_INTERVAL_MS) {
-                lastBlinkToggleMs = now;
-                blinkOn = !blinkOn;
-                fill_solid(leds, NUM_LEDS, blinkOn ? blinkColorFor(mode) : CRGB::Black);
-                FastLED.show();
-            }
+    if (isBlinkingMode(mode)) {
+        if (now - lastBlinkToggleMs >= BLINK_INTERVAL_MS) {
+            lastBlinkToggleMs = now;
+            blinkOn = !blinkOn;
+            fill_solid(leds, NUM_LEDS, blinkOn ? blinkColorFor(mode) : CRGB::Black);
+            FastLED.show();
         }
+    }
+}

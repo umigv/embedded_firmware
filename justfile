@@ -1,102 +1,46 @@
+# just's default recipe shell on Windows is sh, which isn't on PATH on stock machines
+set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
+
 default:
     @just --list
 
-# Install dependencies
+# Install dependencies and generate clangd compile databases
 setup:
-    pip3 install platformio
+    pixi install
+    pixi run python scripts/pio_run.py --target compiledb
 
-# Build a project, or all projects if none specified: just build [project]
+# Build a project, or all projects if none specified
 build project="":
-    #!/usr/bin/env bash
-    set -e
-    if [ -z "{{project}}" ]; then
-        for proj in $(find . -maxdepth 2 -name "platformio.ini" | xargs -I{} dirname {} | sort); do
-            echo "=== Building $proj ==="
-            (cd "$proj" && pio run)
-        done
-    else
-        cd "{{project}}" && pio run
-    fi
+    pixi run python scripts/pio_run.py {{project}}
 
-# Upload to board: just upload [project]
-upload project:
-    cd {{project}} && pio run --target upload
+# Upload to board (extra flags passed through, e.g. --upload-port COM5)
+upload project *args:
+    pixi run pio run -d {{project}} --target upload {{args}}
 
-# Open serial monitor: just monitor [project]
-monitor project:
-    cd {{project}} && pio device monitor
+# Open serial monitor (extra flags passed through, e.g. --port COM5)
+monitor project *args:
+    pixi run pio device monitor -d {{project}} {{args}}
 
-# Clean a project, or all projects if none specified: just clean [project]
+# Clean a project, or all projects if none specified
 clean project="":
-    #!/usr/bin/env bash
-    set -e
-    if [ -z "{{project}}" ]; then
-        for proj in $(find . -maxdepth 2 -name "platformio.ini" | xargs -I{} dirname {} | sort); do
-            echo ""
-            echo "=== Cleaning $proj ==="
-            (cd "$proj" && pio run --target clean)
-        done
-    else
-        cd "{{project}}" && pio run --target clean
-    fi
+    pixi run python scripts/pio_run.py --target clean {{project}}
 
-# Scaffold a new project: just new [project]
-new project:
-    #!/usr/bin/env bash
-    set -e
-    if [ -d "{{project}}" ]; then
-        echo "Error: {{project}} already exists"
-        exit 1
-    fi
-    mkdir -p "{{project}}/src"
-    {
-        echo '# Uncomment and fill in your board config:'
-        echo '#'
-        echo '# [env:esp32dev]'
-        echo '# platform = espressif32'
-        echo '# board = esp32dev'
-        echo '# framework = arduino'
-        echo '# monitor_speed = 9600'
-        echo '#'
-        echo '# [env:megaatmega2560]'
-        echo '# platform = atmelavr'
-        echo '# board = megaatmega2560'
-        echo '# framework = arduino'
-        echo '# monitor_speed = 9600'
-        echo '#'
-        echo '# For other boards: https://registry.platformio.org/search?t=platform'
-    } > "{{project}}/platformio.ini"
-    {
-        echo '#include <Arduino.h>'
-        echo ''
-        echo 'void setup() {'
-        echo ''
-        echo '}'
-        echo ''
-        echo 'void loop() {'
-        echo ''
-        echo '}'
-    } > "{{project}}/src/main.cpp"
-    echo "Created {{project}} — fill in platformio.ini with your board config"
+# Create a new project from template_project
+create-project project:
+    pixi run python scripts/create_project.py {{project}}
 
-# Generate compile_commands.json for clangd IntelliSense in all projects
-# Re-run after changing platformio.ini (e.g. adding a library or changing board)
+# Regenerate compile_commands.json for clangd (run after a platformio.ini changes or on stale errors)
 intellisense:
-    #!/usr/bin/env bash
-    set -e
-    for proj in $(find . -maxdepth 2 -name "platformio.ini" | xargs -I{} dirname {} | sort); do
-        echo "=== $proj ==="
-        (cd "$proj" && pio run --target compiledb)
-    done
+    pixi run python scripts/pio_run.py --target compiledb
 
 # List available serial ports
 ports:
-    pio device list
+    pixi run pio device list
 
-# Run clang-format on all source files (requires clang-format)
+# Run clang-format on all source files
 format:
-    find . -path '*/src/*.cpp' | xargs clang-format -i
+    pixi run python scripts/format.py
 
 # Check formatting without modifying files
 lint:
-    find . -path '*/src/*.cpp' | xargs clang-format --dry-run --Werror
+    pixi run python scripts/format.py --check
