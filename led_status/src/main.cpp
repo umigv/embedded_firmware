@@ -10,7 +10,8 @@
 //   '6' -> Flashing red
 //   '9' -> Rainbow (animated)
 //
-// All modes are non-blocking. Serial commands are responsive at all times, including during animations.
+// All modes are non-blocking — serial commands are responsive at all times,
+// including during animations.
 
 #include <Arduino.h>
 #include <FastLED.h>

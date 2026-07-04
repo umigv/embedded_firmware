@@ -1,8 +1,3 @@
-// recovery_ultrasonic.ino
-// Reads three HC-SR04 ultrasonic sensors and prints all three readings
-// over serial as CSV: "s1,s2,s3\r\n"
-// Compatible with Arduino IDE's Serial Plotter.
-
 #include <Arduino.h>
 
 const int trigPinOne = 9;
@@ -17,7 +12,6 @@ int distanceOne;
 int distanceTwo;
 int distanceThree;
 
-int readUltrasoundSensor(int trigPin, int echoPin);
 double readUltrasoundSensorOne();
 double readUltrasoundSensorTwo();
 double readUltrasoundSensorThree();

@@ -96,9 +96,7 @@ void loop() {
             Serial.print("RSSI: ");
             Serial.println(rf95.lastRssi(), DEC);
         } else {
-            data_packet[0] = ESTOP_SAFE;
-            digitalWrite(LED, LOW);  // TX LED OFF
-            Serial.println("Sending: SAFE (0x00)");
+            Serial.println("Receive failed");
         }
     } else {
         Serial.println("No reply (Timeout)");
