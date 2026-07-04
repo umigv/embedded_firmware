@@ -15,7 +15,7 @@ def main() -> None:
 
     if not re.match(r"^[a-z][a-z0-9_]*$", args.project):
         sys.exit(
-            f"error: invalid project name '{args.project}'. "
+            f"Error: Invalid project name '{args.project}'. "
             "Must start with a lowercase letter and contain only lowercase letters, numbers, and underscores."
         )
 
