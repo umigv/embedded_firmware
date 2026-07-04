@@ -1,8 +1,21 @@
 import argparse
+import json
 import subprocess
 import sys
+from pathlib import Path
 
 from common import ROOT, projects
+
+# GCC-only flags from the ESP32/AVR cross-toolchains; clangd's clang parser rejects them
+GCC_ONLY_FLAGS = {"-mlongcalls", "-fstrict-volatile-bitfields", "-fno-tree-switch-conversion"}
+
+
+def sanitize_compiledb(project: Path) -> None:
+    db = project / "compile_commands.json"
+    entries = json.loads(db.read_text(encoding="utf-8"))
+    for entry in entries:
+        entry["command"] = " ".join(arg for arg in entry["command"].split() if arg not in GCC_ONLY_FLAGS)
+    db.write_text(json.dumps(entries, indent=2), encoding="utf-8")
 
 
 def main() -> None:
@@ -29,6 +42,8 @@ def main() -> None:
         result = subprocess.run(cmd)
         if result.returncode != 0:
             sys.exit(result.returncode)
+        if args.target == "compiledb":
+            sanitize_compiledb(project)
 
 
 if __name__ == "__main__":
