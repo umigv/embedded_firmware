@@ -7,7 +7,7 @@ default:
 # Install dependencies and generate clangd compile databases
 setup:
     pixi install
-    pixi run python scripts/pio_run.py --target compiledb
+    just intellisense
 
 # Build a project, or all projects if none specified
 build project="":
