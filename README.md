@@ -12,8 +12,6 @@ First run the [host bootstrap](https://github.com/umigv/nav-environment) if you 
 just setup
 ```
 
-This installs the toolchain via pixi and generates `compile_commands.json` in each project for clangd IntelliSense.
-
 **VSCode:** Install recommended extensions in this repo (it should automatically prompt you).
 
 **Windows:** everything works natively from PowerShell (no WSL2 needed). If your board isn't detected, you may need the [CP210x](https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers) (most ESP32 boards) or [CH340](https://www.wch-ic.com/downloads/CH341SER_ZIP.html) (most Arduino clones) USB-serial driver.
