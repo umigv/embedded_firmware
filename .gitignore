@@ -1,8 +1,23 @@
-.pio/
-.pixi/
-.cache/
-__pycache__/
+# Vscode
 .vscode/*
-!.vscode/settings.json
 !.vscode/extensions.json
-*/compile_commands.json
+!.vscode/settings.json
+
+# Bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Tool caches
+.cache/
+
+# Generated
+**/compile_commands.json
+
+# PlatformIO
+.pio/
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
