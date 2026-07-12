@@ -8,6 +8,7 @@
 //   '4' -> Flashing yellow
 //   '5' -> Flashing purple
 //   '6' -> Flashing red
+//   '7' -> SOLID green
 //   '9' -> Rainbow (animated)
 //
 // All modes are non-blocking — serial commands are responsive at all times,
@@ -28,7 +29,17 @@ const unsigned long HEARTBEAT_TIMEOUT_MS = 3000;  // rainbow if no command withi
 CRGB leds[NUM_LEDS];
 
 // Mode state.
-enum Mode { MODE_OFF, MODE_TELEOP_BLUE, MODE_BLUE, MODE_GREEN, MODE_YELLOW, MODE_PURPLE, MODE_RED, MODE_RAINBOW };
+enum Mode {
+    MODE_OFF,
+    MODE_TELEOP_BLUE,
+    MODE_BLUE,
+    MODE_GREEN,
+    MODE_YELLOW,
+    MODE_PURPLE,
+    MODE_RED,
+    MODE_SOLID_GREEN,
+    MODE_RAINBOW
+};
 Mode currentMode = MODE_OFF;
 
 // Animation state.
@@ -85,6 +96,9 @@ void handleSerial() {
         case '6':
             currentMode = MODE_RED;
             break;
+        case '7':
+            currentMode = MODE_SOLID_GREEN;
+            break;
         case '9':
             currentMode = MODE_RAINBOW;
             break;
@@ -135,6 +149,12 @@ void updateLeds(Mode mode) {
 
     if (mode == MODE_TELEOP_BLUE) {
         fill_solid(leds, NUM_LEDS, CRGB::Blue);
+        FastLED.show();
+        return;
+    }
+
+    if (mode == MODE_SOLID_GREEN) {
+        fill_solid(leds, NUM_LEDS, CRGB::Green);
         FastLED.show();
         return;
     }

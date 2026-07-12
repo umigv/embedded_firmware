@@ -13,12 +13,13 @@ Serial runs at 9600 baud. One ASCII character per command:
 | Char | Mode |
 |---|---|
 | `0` | Off |
-| `1` | Solid blue (teleop) |
+| `1` | Solid blue |
 | `2` | Flashing blue |
 | `3` | Flashing green |
 | `4` | Flashing yellow |
 | `5` | Flashing purple |
 | `6` | Flashing red |
+| `7` | Solid green |
 | `9` | Rainbow |
 
 Commands double as a heartbeat: if none arrives for 3 s (or none has arrived yet), the strip shows rainbow to signal a disconnected driver.
