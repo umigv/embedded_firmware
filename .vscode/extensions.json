@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "editorconfig.editorconfig",
+        "tamasfe.even-better-toml",
+        "nefrob.vscode-just",
+        "github.vscode-github-actions"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools",
+        "platformio.platformio-ide"
+    ]
+}

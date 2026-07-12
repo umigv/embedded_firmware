@@ -1,0 +1,5 @@
+BasedOnStyle: Google
+IndentWidth: 4
+AccessModifierOffset: -2
+ColumnLimit: 120
+SortIncludes: false # Arduino depends on specific include ordering

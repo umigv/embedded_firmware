@@ -1,0 +1,11 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.enable": true,
+    // let clangd ask the cross-compilers for their builtin include paths (fixes stddef.h/stdbool.h not found)
+    "clangd.arguments": ["--query-driver=**/toolchain-*/bin/*g++*"],
+    "editor.rulers": [120],
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.rulers": []
+    }
+}

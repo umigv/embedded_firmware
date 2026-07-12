@@ -1,0 +1,12 @@
+[workspace]
+name = "embedded_firmware"
+channels = ["https://prefix.dev/conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64", "win-64"]
+
+[dependencies]
+python = "3.14.*"
+# platformio shells out to `python -m pip` when bootstrapping ~/.platformio; conda-forge python doesn't ship pip
+pip = "*"
+platformio = "*"
+# Pin to the same major version as maverick so formatting agrees across repos
+clang-format = "22.*"
